@@ -86,7 +86,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         guard let button = statusItem.button else { return }
 
-        button.title = "Emacx"
+        button.image = StatusIcon.make()
         button.target = self
         button.action = #selector(toggleMenuBarPopup)
         button.sendAction(on: [.leftMouseUp, .rightMouseUp])
