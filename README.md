@@ -34,7 +34,17 @@ Hover over or click "Emacx" in the menu bar to see a list of the menu bar items 
 - macOS 13 or later
 - Swift 5.10 or later (Xcode or Command Line Tools)
 
-## Build and install
+## Install
+
+```sh
+brew install --cask koheisg/tap/emacx
+```
+
+On first launch, grant Emacx access in System Settings > Privacy & Security > Accessibility. Key monitoring starts automatically once access is granted.
+
+The app is only ad-hoc signed (not notarized), so the cask removes the quarantine attribute after installation to let it launch.
+
+## Build from source
 
 ```sh
 make app                          # builds .build/Emacx.app
@@ -42,18 +52,17 @@ cp -r .build/Emacx.app /Applications/
 open /Applications/Emacx.app
 ```
 
-On first launch, grant Emacx access in System Settings > Privacy & Security > Accessibility. Key monitoring starts automatically once access is granted.
-
 Other make targets:
 
 - `make build`: debug build
 - `make release`: release build
+- `make dist`: build the `.app` and zip it for release
 - `make run`: build the `.app` and launch it
 - `make clean`: remove build artifacts
 
 ### Notes
 
-- The binary is built only for the architecture of the Mac you build on (not a universal binary).
+- `make app` builds a universal binary (arm64 and x86_64) and requires Xcode.
 - The app is only ad-hoc signed. If you copy a built `.app` to another Mac, Gatekeeper will block it; run `xattr -dr com.apple.quarantine /Applications/Emacx.app` to allow it.
 - Because of the ad-hoc signature, the Accessibility permission is lost on every rebuild. After updating, remove Emacx from the list in System Settings and add it again.
 
