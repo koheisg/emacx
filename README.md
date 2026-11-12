@@ -1,67 +1,67 @@
 # Emacx
 
-macOS のメニューバーに常駐して、Emacs 風のキー操作を補うアプリです。クリップボード履歴も扱えます。
+A macOS menu bar app that fills in missing Emacs-style keybindings and provides a clipboard history.
 
-## 機能
+## Features
 
-### キー操作
+### Keybindings
 
-macOS のテキスト入力には、C-a、C-e、C-b、C-f、C-n、C-p、C-d、C-h、C-k などの Emacs 風キー操作がはじめから入っています。Emacx は、標準にない次の2つを補います。
+macOS text fields already support many Emacs-style bindings out of the box (C-a, C-e, C-b, C-f, C-n, C-p, C-d, C-h, C-k, and more). Emacx adds the two that are missing:
 
-| キー | 動作 | 実際に送るキー |
+| Key | Action | Keys actually sent |
 |---|---|---|
-| C-w | 直前の単語を削除 | ⌥⌫ |
-| C-u | カーソルから行頭までを削除 | ⌘⇧← のあと ⌫ |
+| C-w | Delete the previous word | ⌥⌫ |
+| C-u | Delete from the cursor to the beginning of the line | ⌘⇧← then ⌫ |
 
-ターミナル（Terminal、iTerm2、WezTerm、kitty、Alacritty、Ghostty、Warp、Hyper）が手前にあるときは置き換えません。シェル本来の C-w／C-u がそのまま効きます。
+These are not remapped while a terminal is frontmost (Terminal, iTerm2, WezTerm, kitty, Alacritty, Ghostty, Warp, Hyper), so the shell's own C-w / C-u keep working.
 
-### クリップボード履歴
+### Clipboard history
 
-⌘⇧V で履歴のパネルを開きます。
+Press ⌘⇧V to open the history panel.
 
-- 文字を入力すると絞り込めます。
-- ↑↓ で選んで Return を押すと、その項目をクリップボードに入れて貼り付けます。
-- Esc で閉じます。
+- Type to filter.
+- Use ↑ / ↓ to select an item and Return to copy it to the clipboard and paste it.
+- Press Esc to close.
 
-履歴はテキストだけで、最大 100 件を UserDefaults に保存します。暗号化はしないので、パスワードなどをコピーしたときは注意してください。
+Only text is recorded, up to 100 items, stored in UserDefaults. The history is not encrypted, so be careful when copying passwords or other secrets.
 
-### メニューバー
+### Menu bar
 
-メニューバーの「Emacx」にマウスを乗せるかクリックすると、他のアプリがメニューバーに出している項目が一覧で表示されます。
+Hover over or click "Emacx" in the menu bar to see a list of the menu bar items shown by other apps.
 
-## 動作環境
+## Requirements
 
-- macOS 13 以上
-- Swift 5.10 以上（Xcode か Command Line Tools）
+- macOS 13 or later
+- Swift 5.10 or later (Xcode or Command Line Tools)
 
-## ビルドとインストール
+## Build and install
 
 ```sh
-make app                          # .build/Emacx.app を作る
+make app                          # builds .build/Emacx.app
 cp -r .build/Emacx.app /Applications/
 open /Applications/Emacx.app
 ```
 
-起動したら、「システム設定 > プライバシーとセキュリティ > アクセシビリティ」で Emacx を許可してください。許可すると、自動でキー操作の監視を始めます。
+On first launch, grant Emacx access in System Settings > Privacy & Security > Accessibility. Key monitoring starts automatically once access is granted.
 
-その他の make ターゲット:
+Other make targets:
 
-- `make build`：デバッグビルド
-- `make release`：リリースビルド
-- `make run`：`.app` を作って起動
-- `make clean`：ビルド成果物を削除
+- `make build`: debug build
+- `make release`: release build
+- `make run`: build the `.app` and launch it
+- `make clean`: remove build artifacts
 
-### 注意
+### Notes
 
-- ビルドされるのは、ビルドした Mac のアーキテクチャ向けのバイナリだけです（ユニバーサルバイナリではありません）。
-- 署名は ad-hoc だけです。ビルドした `.app` を別の Mac にコピーすると Gatekeeper にブロックされます。その場合は `xattr -dr com.apple.quarantine /Applications/Emacx.app` を実行してください。
-- ad-hoc 署名なので、アクセシビリティの許可はビルドごとに外れます。更新したら、設定の一覧から Emacx を一度削除して追加し直してください。
+- The binary is built only for the architecture of the Mac you build on (not a universal binary).
+- The app is only ad-hoc signed. If you copy a built `.app` to another Mac, Gatekeeper will block it; run `xattr -dr com.apple.quarantine /Applications/Emacx.app` to allow it.
+- Because of the ad-hoc signature, the Accessibility permission is lost on every rebuild. After updating, remove Emacx from the list in System Settings and add it again.
 
-## 既知の問題
+## Known issues
 
-- 画面共有などで他の Mac を操作しているときも、操作する側の Emacx が C-w／C-u を置き換えます。そのため、リモート側でターミナルを使っていても、C-w／C-u がシェル本来の動作になりません。
-- C-w、C-u、⌘⇧V では、キーの押下だけを飲み込み、解放はそのまま通しています。
+- When controlling another Mac via Screen Sharing or similar apps, Emacx on the controlling Mac still remaps C-w / C-u. As a result, C-w / C-u do not behave as the shell expects even when a terminal is frontmost on the remote Mac.
+- For C-w, C-u, and ⌘⇧V, Emacx swallows only the key-down event; the key-up event is passed through.
 
-## ライセンス
+## License
 
 [MIT](LICENSE)
