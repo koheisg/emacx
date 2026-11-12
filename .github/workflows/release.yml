@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check tag matches Info.plist version
+        run: |
+          plist_version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' Resources/Info.plist)"
+          if [ "v${plist_version}" != "${GITHUB_REF_NAME}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match Info.plist version ${plist_version}"
+            exit 1
+          fi
+          echo "VERSION=${plist_version}" >> "$GITHUB_ENV"
+
+      - name: Build zip
+        run: make dist
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" ".build/Emacx-${VERSION}.zip" \
+            --title "${GITHUB_REF_NAME}" --generate-notes
+
+      - name: Update Homebrew cask
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          sha256="$(shasum -a 256 ".build/Emacx-${VERSION}.zip" | cut -d' ' -f1)"
+          gh repo clone koheisg/homebrew-tap tap
+          cd tap
+          sed -i '' -E \
+            -e "s/^  version \".*\"/  version \"${VERSION}\"/" \
+            -e "s/^  sha256 \".*\"/  sha256 \"${sha256}\"/" \
+            Casks/emacx.rb
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Update emacx to ${VERSION}"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/koheisg/homebrew-tap.git" HEAD:main
