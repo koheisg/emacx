@@ -6,9 +6,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var keyInterceptor: KeyInterceptor?
     private var trustTimer: Timer?
-    private let menuBarManager = MenuBarManager()
-    private var menuBarWindow: MenuBarPopupWindow?
-    private var trackingArea: NSTrackingArea?
+    private let menu = NSMenu()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -84,53 +82,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func configureStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        guard let button = statusItem.button else { return }
-
-        button.image = StatusIcon.make()
-        button.target = self
-        button.action = #selector(toggleMenuBarPopup)
-        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
-
-        trackingArea = NSTrackingArea(
-            rect: button.bounds,
-            options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
-            owner: self,
-            userInfo: nil
-        )
-        button.addTrackingArea(trackingArea!)
+        statusItem.button?.image = StatusIcon.make()
+        menu.delegate = self
+        statusItem.menu = menu
     }
+}
 
-    @objc func mouseEntered(with event: NSEvent) {
-        showMenuBarPopup()
-    }
-
-    @objc func mouseExited(with event: NSEvent) {
-        menuBarWindow?.scheduleClose()
-    }
-
-    @objc private func toggleMenuBarPopup() {
-        if menuBarWindow?.isVisible == true {
-            menuBarWindow?.close()
-            menuBarWindow = nil
-        } else {
-            showMenuBarPopup()
+extension AppDelegate: NSMenuDelegate {
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        menu.removeAllItems()
+        if !AXIsProcessTrusted() {
+            menu.addItem(withTitle: "Accessibility Permission Is Missing", action: nil, keyEquivalent: "")
+            menu.addItem(.separator())
         }
-    }
-
-    private func showMenuBarPopup() {
-        guard let button = statusItem.button, let screen = button.window?.screen else { return }
-
-        let items = menuBarManager.visibleMenuBarItems()
-        let window = menuBarWindow ?? MenuBarPopupWindow()
-        window.update(items: items)
-        window.onClose = { [weak self] in self?.menuBarWindow = nil }
-
-        let buttonFrame = button.window?.convertToScreen(button.frame) ?? .zero
-        let size = window.frame.size
-        let x = min(max(buttonFrame.midX - size.width / 2, screen.visibleFrame.minX + 8), screen.visibleFrame.maxX - size.width - 8)
-        let y = max(buttonFrame.minY - size.height - 8, screen.visibleFrame.minY + 8)
-        window.setFrame(NSRect(x: x, y: y, width: size.width, height: size.height), display: true)
-        window.makeKeyAndOrderFront(nil)
-        menuBarWindow = window
+        menu.addItem(withTitle: "Quit Emacx", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
     }
 }

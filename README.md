@@ -25,10 +25,6 @@ Press ⌘⇧V to open the history panel.
 
 Only text is recorded, up to 100 items, stored in UserDefaults. The history is not encrypted, so be careful when copying passwords or other secrets.
 
-### Menu bar
-
-Hover over or click "Emacx" in the menu bar to see a list of the menu bar items shown by other apps.
-
 ## Requirements
 
 - macOS 13 or later
@@ -58,6 +54,7 @@ Other make targets:
 - `make release`: release build
 - `make dist`: build the `.app` and zip it for release
 - `make run`: build the `.app` and launch it
+- `make reload`: rebuild, quit the running Emacx, reset its Accessibility permission, and relaunch it (you only need to turn the permission back on)
 - `make clean`: remove build artifacts
 
 ### Notes
