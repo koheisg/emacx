@@ -27,6 +27,11 @@ cat > "$RESOURCES/README.txt" <<'TEXT'
 Emacx requires Accessibility permission in System Settings > Privacy & Security > Accessibility.
 TEXT
 
-codesign --force --sign - "$APP_DIR"
+# A stable local identity keeps the Accessibility grant across rebuilds; CI falls back to ad-hoc.
+SIGN_IDENTITY="-"
+if security find-identity -p codesigning | grep -q '"Emacx Local Signing"'; then
+  SIGN_IDENTITY="Emacx Local Signing"
+fi
+codesign --force --sign "$SIGN_IDENTITY" "$APP_DIR"
 
 printf 'Built %s\n' "$APP_DIR"
