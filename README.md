@@ -1,6 +1,6 @@
 # Emacx
 
-A macOS menu bar app that fills in missing Emacs-style keybindings and provides a clipboard history.
+A macOS menu bar app that fills in missing Emacs-style keybindings and opens the Spotlight clipboard history with ⌘⇧V.
 
 ## Features
 
@@ -17,13 +17,9 @@ These are not remapped while a terminal is frontmost (Terminal, iTerm2, WezTerm,
 
 ### Clipboard history
 
-Press ⌘⇧V to open the history panel.
+Press ⌘⇧V to open Spotlight's clipboard history (macOS 26 or later). Emacx sends your Spotlight shortcut as configured in System Settings (⌘Space by default) and then ⌘4.
 
-- Type to filter.
-- Use ↑ / ↓ to select an item and Return to copy it to the clipboard and paste it.
-- Press Esc to close.
-
-Only text is recorded, up to 100 items, stored in UserDefaults. The history is not encrypted, so be careful when copying passwords or other secrets.
+Turn on clipboard history in System Settings > Spotlight first. Emacx itself no longer records the clipboard.
 
 ## Requirements
 
@@ -62,6 +58,7 @@ Other make targets:
 - `make app` builds a universal binary (arm64 and x86_64) and requires Xcode.
 - The app is only ad-hoc signed. If you copy a built `.app` to another Mac, Gatekeeper will block it; run `xattr -dr com.apple.quarantine /Applications/Emacx.app` to allow it.
 - Because of the ad-hoc signature, the Accessibility permission is lost on every rebuild. After updating, remove Emacx from the list in System Settings and add it again.
+- To keep the permission across local rebuilds, create a self-signed code signing certificate named `Emacx Local Signing` in your login keychain. `make app` signs with it when it exists.
 
 ## Known issues
 

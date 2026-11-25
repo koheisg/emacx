@@ -90,7 +90,7 @@ final class KeyInterceptor {
         let hasShift = flags.contains(.maskShift)
 
         if hasCmd && hasShift && !hasCtrl && !hasAlt && keyCode == 0x09 {
-            ClipboardPanel.shared.toggle()
+            postOpenSpotlightClipboard()
             return nil
         }
 
@@ -160,5 +160,30 @@ final class KeyInterceptor {
     private func postSelectToBeginningOfLineAndDelete() {
         postKeyDownUp(0x7B, flags: [.maskCommand, .maskShift])
         postKeyDownUp(0x33)
+    }
+
+    private func postOpenSpotlightClipboard() {
+        guard let (keyCode, flags) = spotlightHotKey() else { return }
+        postKeyDownUp(keyCode, flags: flags)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+            self?.postKeyDownUp(0x15, flags: [.maskCommand]) // Cmd+4
+        }
+    }
+
+    // Reads "Show Spotlight search" (symbolic hotkey 64) from System Settings.
+    // Its modifier bits match CGEventFlags. Missing entry means the default Cmd+Space.
+    private func spotlightHotKey() -> (CGKeyCode, CGEventFlags)? {
+        let hotKeys = UserDefaults(suiteName: "com.apple.symbolichotkeys")?
+            .dictionary(forKey: "AppleSymbolicHotKeys")
+        guard let entry = hotKeys?["64"] as? [String: Any] else {
+            return (0x31, [.maskCommand])
+        }
+        guard entry["enabled"] as? Bool == true,
+              let value = entry["value"] as? [String: Any],
+              let parameters = value["parameters"] as? [Int],
+              parameters.count == 3 else {
+            return nil
+        }
+        return (CGKeyCode(parameters[1]), CGEventFlags(rawValue: UInt64(parameters[2])))
     }
 }

@@ -11,14 +11,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         configureStatusItem()
-        ClipboardManager.shared.start()
         startKeyInterceptorIfTrusted()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         trustTimer?.invalidate()
         keyInterceptor?.stop()
-        ClipboardManager.shared.stop()
     }
 
     private func startKeyInterceptorIfTrusted() {
